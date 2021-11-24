@@ -1,82 +1,78 @@
-"""Assets"""
+"""
+	For ease of use, please lay out your grid in Euclidean-plane format and NOT
+	in numpy-type format. For example, if an object needs to be placed in the
+	3rd row and 7th column of the gridworld numpy matrix, enter its location in your
+	layout dict as [7,3]. The codebase will take care of the matrix-indexing for you.
+	For example, the above object will be queried as grid[3, 7] when placed into the
+	grid.
+
+"""
 
 LINEAR = {
 	'FOUR_PLAYER_WALLS': [
 		# First wall
-		[11, 0],
-		[11, 1],
-		[11, 2],
-		[11, 3],
-		[11, 4],
-		[11, 5],
-		# [11, 6],
-		# [11, 7],
-		[11, 8],
-		# [11, 9],
-		# [11, 10],
-		# [11, 11],
-		# [11, 12],
-		# [11, 13],
-		# [11, 14],
+		[0, 11],
+		[1, 11],
+		[2, 11],
+		[3, 11],
+		[4, 11],
+		[5, 11],
+		[8, 11],
 
 		# Second wall
-		[7, 0],
-		[7, 1],
-		# [7, 2],
-		# [7, 3],
-		[7, 4],
-		[7, 5],
-		[7, 6],
-		[7, 7],
-		[7, 8],
 		# [7, 9],
 		# [7, 10],
 		# [7, 11],
 		# [7, 12],
 		# [7, 13],
 		# [7, 14],
+		[0, 7],
+		[1, 7],
+		[4, 7],
+		[5, 7],
+		[6, 7],
+		[7, 7],
+		[8, 7],
 
 		# Third wall
-		[3, 0],
-		[3, 1],
-		[3, 2],
-		[3, 3],
-		[3, 4],
-		[3, 5],
-		# [3, 6],
-		# [3, 7],
-		[3, 8],
 		# [3, 9],
 		# # [3, 10],
 		# [3, 11],
 		# [3, 12],
 		# [3, 13],
 		# [3, 14]
+		[0, 3],
+		[1, 3],
+		[2, 3],
+		[3, 3],
+		[4, 3],
+		[5, 3],
+		[8, 3]
 
 	],
 
 	# Doors are double doors of coord [[x1,x2], [y1,y2]]
 	'FOUR_PLAYER_DOORS': [
-		[[11, 11], [6, 7]],
-		[[7, 7], [2, 3]],
-		[[3, 3], [6, 7]]
+		[[6, 7], [11, 11]],
+		[[2, 3], [7, 7]],
+		[[6, 7], [3, 3]]
 	],
 
 	'FOUR_PLAYER_PLATES': [
-		[13, 7],
-		[9, 2],
-		[5, 7],
+		[7, 13],
+		[2, 9],
+		[7, 5]
 	],
 
 	'FOUR_PLAYER_AGENTS': [
-		[13, 5],
-		[12, 5],
-		[13, 4],
-		[12, 4]
+		[5, 13],
+		[5, 12],
+		[4, 13],
+		[4, 12]
 	],
 
 	'FOUR_PLAYER_GOAL': [
-		[1, 3]
+		[3, 1]
 	]
 }
 

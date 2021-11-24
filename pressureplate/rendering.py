@@ -190,7 +190,7 @@ class Viewer:
         batch = pyglet.graphics.Batch()
 
         for player in env.agents:
-            row, col = player.x, player.y
+            row, col = player.y, player.x
             players.append(
                 pyglet.sprite.Sprite(
                     self.img_agent,
@@ -210,7 +210,7 @@ class Viewer:
         batch = pyglet.graphics.Batch()
 
         for wall in env.walls:
-            row, col = wall.x, wall.y
+            row, col = wall.y, wall.x
             walls.append(
                 pyglet.sprite.Sprite(
                     self.img_wall,
@@ -230,7 +230,7 @@ class Viewer:
 
         for door in env.doors:
             for j in range(len(door.x)):
-                row, col = door.x[j], door.y[j]
+                row, col = door.y[j], door.x[j]
 
                 # if not len(door.x) > 1:
                 if not door.open:
@@ -273,7 +273,7 @@ class Viewer:
         batch = pyglet.graphics.Batch()
 
         for plate in env.plates:
-            row, col = plate.x, plate.y
+            row, col = plate.y, plate.x
 
             if plate.pressed:
                 plates.append(
@@ -302,7 +302,7 @@ class Viewer:
         goals = []
         batch = pyglet.graphics.Batch()
 
-        row, col = env.goal.x, env.goal.y
+        row, col = env.goal.y, env.goal.x
 
         if env.goal.achieved:
             goals.append(
@@ -330,18 +330,18 @@ class Viewer:
     def _draw_badges(self, env):
         # Agents
         for agent in env.agents:
-            self._draw_badge(agent.x, agent.y, agent.id)
+            self._draw_badge(agent.y, agent.x, agent.id)
 
         # Plates
         for plate in env.plates:
             if not plate.pressed:
-                self._draw_badge(plate.x, plate.y, plate.id)
+                self._draw_badge(plate.y, plate.x, plate.id)
 
         # Doors
         for door in env.doors:
             if not door.open:
                 for j in range(len(door.x)):
-                    self._draw_badge(door.x[j], door.y[j], door.id)
+                    self._draw_badge(door.y[j], door.x[j], door.id)
 
     def _draw_badge(self, row, col, id):
         resolution = 6

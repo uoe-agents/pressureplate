@@ -19,7 +19,7 @@ class Actions(IntEnum):
     Down = 1
     Left = 2
     Right = 3
-    Noop = 5
+    Noop = 4
 
 
 class Entity:
@@ -90,7 +90,6 @@ class PressurePlate(gym.Env):
         if layout == 'linear':
             self.layout = LINEAR
 
-
     def step(self, actions):
         """[up, down, left, right]"""
         for i, a in enumerate(actions):
@@ -98,24 +97,24 @@ class PressurePlate(gym.Env):
             proposed_pos = [self.agents[i].x, self.agents[i].y]
 
             if a == 0:
-                proposed_pos[0] -= 1
-                if not self._detect_collision(proposed_pos):
-                    self.agents[i].x -= 1
-
-            elif a == 1:
-                proposed_pos[0] += 1
-                if not self._detect_collision(proposed_pos):
-                    self.agents[i].x += 1
-
-            elif a == 2:
                 proposed_pos[1] -= 1
                 if not self._detect_collision(proposed_pos):
                     self.agents[i].y -= 1
 
-            elif a == 3:
+            elif a == 1:
                 proposed_pos[1] += 1
                 if not self._detect_collision(proposed_pos):
                     self.agents[i].y += 1
+
+            elif a == 2:
+                proposed_pos[0] -= 1
+                if not self._detect_collision(proposed_pos):
+                    self.agents[i].x -= 1
+
+            elif a == 3:
+                proposed_pos[0] += 1
+                if not self._detect_collision(proposed_pos):
+                    self.agents[i].x += 1
 
             else:
                 # NOOP
@@ -169,8 +168,8 @@ class PressurePlate(gym.Env):
         if np.any([
             proposed_position[0] < 0,
             proposed_position[1] < 0,
-            proposed_position[0] >= self.grid_size[0],
-            proposed_position[1] >= self.grid_size[1]
+            proposed_position[0] >= self.grid_size[1],
+            proposed_position[1] >= self.grid_size[0]
         ]):
             return True
 
@@ -200,27 +199,27 @@ class PressurePlate(gym.Env):
         # Agents
         for i, agent in enumerate(self.layout['FOUR_PLAYER_AGENTS']):
             self.agents.append(Agent(i, agent[0], agent[1]))
-            self.grid[_LAYER_AGENTS, agent[0], agent[1]] = 1
+            self.grid[_LAYER_AGENTS, agent[1], agent[0]] = 1
 
         # Walls
         for i, wall in enumerate(self.layout['FOUR_PLAYER_WALLS']):
             self.walls.append(Wall(i, wall[0], wall[1]))
-            self.grid[_LAYER_WALLS, wall[0], wall[1]] = 1
+            self.grid[_LAYER_WALLS, wall[1], wall[0]] = 1
 
         # Doors
         for i, door in enumerate(self.layout['FOUR_PLAYER_DOORS']):
             self.doors.append(Door(i, door[0], door[1]))
             for j in range(len(door[0])):
-                self.grid[_LAYER_DOORS, door[0][j], door[1][j]] = 1
+                self.grid[_LAYER_DOORS, door[1][j], door[0][j]] = 1
 
         # Plate
         for i, plate in enumerate(self.layout['FOUR_PLAYER_PLATES']):
             self.plates.append(Plate(i, plate[0], plate[1]))
-            self.grid[_LAYER_PLATES, plate[0], plate[1]] = 1
+            self.grid[_LAYER_PLATES, plate[1], plate[0]] = 1
 
         # Goal
         self.goal = Goal('goal', self.layout['FOUR_PLAYER_GOAL'][0][0], self.layout['FOUR_PLAYER_GOAL'][0][1])
-        self.grid[_LAYER_GOAL, self.layout['FOUR_PLAYER_GOAL'][0][0], self.layout['FOUR_PLAYER_GOAL'][0][1]] = 1
+        self.grid[_LAYER_GOAL, self.layout['FOUR_PLAYER_GOAL'][0][1], self.layout['FOUR_PLAYER_GOAL'][0][0]] = 1
 
         # return self._get_obs()
 
@@ -269,25 +268,25 @@ class PressurePlate(gym.Env):
 
         # Plate
         for plate in self.plates:
-            grid[plate.x, plate.y] = 2
+            grid[plate.y, plate.x] = 2
 
         # Walls
         for wall in self.walls:
-            grid[wall.x, wall.y] = 3
+            grid[wall.y, wall.x] = 3
 
         # Doors
         for door in self.doors:
             if door.open:
-                grid[door.x, door.y] = 0
+                grid[door.y, door.x] = 0
             else:
-                grid[door.x, door.y] = 4
+                grid[door.y, door.x] = 4
 
         # Goal
-        grid[self.goal.x, self.goal.y] = 5
+        grid[self.goal.y, self.goal.x] = 5
 
         # Agents
         for agent in self.agents:
-            grid[agent.x, agent.y] = 1
+            grid[agent.y, agent.x] = 1
 
         return grid
 

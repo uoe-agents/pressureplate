@@ -6,6 +6,9 @@
 	For example, the above object will be queried as grid[3, 7] when placed into the
 	grid.
 
+	NOTE: the origin (0,0) is the top-left corner of the grid. The positive direction
+	along the x-axis counts to the right and the positive direction along the y-axis
+
 """
 
 LINEAR = {
@@ -65,7 +68,7 @@ LINEAR = {
 	],
 
 	'FOUR_PLAYER_AGENTS': [
-		[5, 13],
+		[5, 13], # [5, 13],
 		[5, 12],
 		[4, 13],
 		[4, 12]

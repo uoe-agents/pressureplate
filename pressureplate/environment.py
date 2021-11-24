@@ -230,38 +230,70 @@ class PressurePlate(gym.Env):
             x, y = agent.x, agent.y
             pad = self.sensor_range // 2
 
-            print(f'{x},{y}')
-            print(f'pad: {pad}')
-
             x_left = max(0, x - pad)
             x_right = min(self.grid_size[1] - 1, x + pad)
             y_up = max(0, y - pad)
             y_down = min(self.grid_size[0] - 1, y + pad)
-
-            print(f'x_left: {x_left}')
-            print(f'x_right: {x_right}')
-            print(f'y_up: {y_up}')
-            print(f'y_down: {y_down}')
 
             x_left_padding = pad - (x - x_left)
             x_right_padding = pad - (x_right - x)
             y_up_padding = pad - (y - y_up)
             y_down_padding = pad - (y_down - y)
 
+            # When the agent's vision, as defined by self.sensor_range, goes off of the grid, we
+            # pad the grid-version of the observation. For all objects but walls, we pad with zeros.
+            # For walls, we pad with ones, as edges of the grid act in the same way as walls.
+            # For padding, we follow a simple pattern: pad left, pad right, pad up, pad down
             # Agents
-            _agents = self.grid_size[_LAYER_AGENTS, y_up:y_down, x_left:x_right]
-            _agents = np.concatenate((np.zeros((self.sensor_range, x_left_padding)), _agents), axis=1)
-            _agents = np.concatenate(_agents, np.zeros((self.sensor_range, x_right_padding)), axis=1)
-            print(_agents)
-            qqqq
+            _agents = self.grid[_LAYER_AGENTS, y_up:y_down + 1, x_left:x_right + 1]
+
+            _agents = np.concatenate((np.zeros((_agents.shape[0], x_left_padding)), _agents), axis=1)
+            _agents = np.concatenate((_agents, np.zeros((_agents.shape[0], x_right_padding))), axis=1)
+            _agents = np.concatenate((np.zeros((y_up_padding, _agents.shape[1])), _agents), axis=0)
+            _agents = np.concatenate((_agents, np.zeros((y_down_padding, _agents.shape[1]))), axis=0)
+            _agents = _agents.reshape(-1)
+
             # Walls
+            _walls = self.grid[_LAYER_WALLS, y_up:y_down + 1, x_left:x_right + 1]
+
+            _walls = np.concatenate((np.ones((_walls.shape[0], x_left_padding)), _walls), axis=1)
+            _walls = np.concatenate((_walls, np.ones((_walls.shape[0], x_right_padding))), axis=1)
+            _walls = np.concatenate((np.ones((y_up_padding, _walls.shape[1])), _walls), axis=0)
+            _walls = np.concatenate((_walls, np.ones((y_down_padding, _walls.shape[1]))), axis=0)
+            _walls = _walls.reshape(-1)
 
             # Doors
+            _doors = self.grid[_LAYER_DOORS, y_up:y_down + 1, x_left:x_right + 1]
+
+            _doors = np.concatenate((np.zeros((_doors.shape[0], x_left_padding)), _doors), axis=1)
+            _doors = np.concatenate((_doors, np.zeros((_doors.shape[0], x_right_padding))), axis=1)
+            _doors = np.concatenate((np.zeros((y_up_padding, _doors.shape[1])), _doors), axis=0)
+            _doors = np.concatenate((_doors, np.zeros((y_down_padding, _doors.shape[1]))), axis=0)
+            _doors = _doors.reshape(-1)
 
             # Plate
+            # TODO: should an agent be able to see all plates or only _their_ plate?
+            _plates = self.grid[_LAYER_PLATES, y_up:y_down + 1, x_left:x_right + 1]
+
+            _plates = np.concatenate((np.zeros((_plates.shape[0], x_left_padding)), _plates), axis=1)
+            _plates = np.concatenate((_plates, np.zeros((_plates.shape[0], x_right_padding))), axis=1)
+            _plates = np.concatenate((np.zeros((y_up_padding, _plates.shape[1])), _plates), axis=0)
+            _plates = np.concatenate((_plates, np.zeros((y_down_padding, _plates.shape[1]))), axis=0)
+            _plates = _plates.reshape(-1)
 
             # Goal
-        pass # for now
+            _goal = self.grid[_LAYER_GOAL, y_up:y_down + 1, x_left:x_right + 1]
+
+            _goal = np.concatenate((np.zeros((_goal.shape[0], x_left_padding)), _goal), axis=1)
+            _goal = np.concatenate((_goal, np.zeros((_goal.shape[0], x_right_padding))), axis=1)
+            _goal = np.concatenate((np.zeros((y_up_padding, _goal.shape[1])), _goal), axis=0)
+            _goal = np.concatenate((_goal, np.zeros((y_down_padding, _goal.shape[1]))), axis=0)
+            _goal = _goal.reshape(-1)
+
+            # Concat
+            obs.append(np.concatenate((_agents, _walls, _doors, _plates, _goal), axis=0))
+
+        return obs
 
     def _get_flat_grid(self):
         grid = np.zeros(self.grid_size)

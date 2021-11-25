@@ -79,10 +79,6 @@ class PressurePlate(gym.Env):
 
         self.action_space_dim = (sensor_range + 1) * (sensor_range + 1) * 5
 
-        # self.observation_space = spaces.Tuple(tuple(
-        #     n_agents * [spaces.Box(0, 1, (1, (sensor_range + 1) * (sensor_range + 1) * 5))]
-        # ))
-
         self.observation_space = spaces.Tuple(tuple(
             n_agents * [spaces.Box(np.array([0] * self.action_space_dim), np.array([1] * self.action_space_dim))]
         ))

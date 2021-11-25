@@ -90,10 +90,11 @@ class PressurePlate(gym.Env):
         if layout == 'linear':
             self.layout = LINEAR
 
+        self.max_dist = np.linalg.norm(np.array([0, 0]) - np.array([self.grid_size[0] - 1, self.grid_size[1] - 1]), 1)
+
     def step(self, actions):
         """[up, down, left, right]"""
         for i, a in enumerate(actions):
-            # print(f'Current: {[self.agents[i].x, self.agents[i].y]}')
             proposed_pos = [self.agents[i].x, self.agents[i].y]
 
             if a == 0:
@@ -119,28 +120,6 @@ class PressurePlate(gym.Env):
             else:
                 # NOOP
                 pass
-
-        # Detecting plate pressing
-        # Each plate is directly tied to a door. For this, we are using iter indexing
-        # e.g., the ith plate is tied to the ith door
-        # There is a sub-loop to handle the case where a plate was stood upon in the previous iteration
-        # TODO: alter this to tie specific agent to specific plate
-        # for i, plate in enumerate(self.plates):
-        #
-        #     if not plate.pressed:
-        #         for agent in self.agents:
-        #             if [plate.x, plate.y] == [agent.x, agent.y]:
-        #                 plate.pressed = True
-        #                 self.doors[i].open = True
-        #
-        #     if plate.pressed:
-        #         standing = []
-        #         for agent in self.agents:
-        #             standing.append([plate.x, plate.y] == [agent.x, agent.y])
-        #
-        #         if np.sum(standing) == 0:
-        #             plate.pressed = False
-        #             self.doors[i].open = False
 
         for i, plate in enumerate(self.plates):
             if not plate.pressed:
@@ -321,6 +300,26 @@ class PressurePlate(gym.Env):
             grid[agent.y, agent.x] = 1
 
         return grid
+
+    def _get_rewards(self):
+        rewards = []
+
+        # The last agent's desired location is the goal instead of a plate, so we use an if/else block
+        # to break between the two cases
+        for i, agent in enumerate(self.agents):
+            if not i == len(self.agents) - 1:
+                plate_loc = self.plates[i].x, self.plates[i].y
+                agent_loc = agent.x, agent.y
+                dist_penalty = np.linalg.norm((np.array(plate_loc) - np.array(agent_loc)), 1) / self.max_dist
+                rewards.append(-1 - dist_penalty)
+
+            else:
+                goal_loc = self.goal.x, self.goal.y
+                agent_loc = agent.x, agent.y
+                dist_penalty = np.linalg.norm((np.array(goal_loc) - np.array(agent_loc)), 1) / self.max_dist
+                rewards.append(-1 - dist_penalty)
+
+        return rewards
 
     def _init_render(self):
         from .rendering import Viewer

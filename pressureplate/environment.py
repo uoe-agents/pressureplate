@@ -93,7 +93,7 @@ class PressurePlate(gym.Env):
         if layout == 'linear':
             self.layout = LINEAR
 
-        self.max_dist = np.linalg.norm(np.array([0, 0]) - np.array([self.grid_size[0] - 1, self.grid_size[1] - 1]), 1)
+        self.max_dist = np.linalg.norm(np.array([0, 0]) - np.array([self.grid_size[0] - 1, self.grid_size[1] - 1]), 2)
 
     def step(self, actions):
         """obs, reward, done info"""
@@ -320,16 +320,24 @@ class PressurePlate(gym.Env):
             if not i == (len(self.agents) - 1):
                 plate_loc = self.plates[i].x, self.plates[i].y
                 agent_loc = agent.x, agent.y
-                dist_penalty = np.linalg.norm((np.array(plate_loc) - np.array(agent_loc)), 1) / self.max_dist
+                dist_penalty = np.linalg.norm((np.array(plate_loc) - np.array(agent_loc)), 2) / self.max_dist
+                if dist_penalty == 0:
+                    on_plate = 1
+                else:
+                    on_plate = 0
                 row_penalty = agent.y / self.grid_size[0]
-                rewards.append(-1 - dist_penalty - row_penalty)
+                rewards.append(-1 - dist_penalty - row_penalty + on_plate)
 
             else:
                 goal_loc = self.goal.x, self.goal.y
                 agent_loc = agent.x, agent.y
-                dist_penalty = np.linalg.norm((np.array(goal_loc) - np.array(agent_loc)), 1) / self.max_dist
+                dist_penalty = np.linalg.norm((np.array(goal_loc) - np.array(agent_loc)), 2) / self.max_dist
                 row_penalty = agent.y / self.grid_size[0]
-                rewards.append(-1 - dist_penalty - row_penalty)
+                if dist_penalty == 0:
+                    on_plate = 1
+                else:
+                    on_plate = 0
+                rewards.append(-1 - dist_penalty - row_penalty + on_plate)
 
         return rewards
 

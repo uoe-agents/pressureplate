@@ -321,13 +321,15 @@ class PressurePlate(gym.Env):
                 plate_loc = self.plates[i].x, self.plates[i].y
                 agent_loc = agent.x, agent.y
                 dist_penalty = np.linalg.norm((np.array(plate_loc) - np.array(agent_loc)), 1) / self.max_dist
-                rewards.append(-1 - dist_penalty)
+                row_penalty = agent.y / self.grid_size[0]
+                rewards.append(-1 - dist_penalty - row_penalty)
 
             else:
                 goal_loc = self.goal.x, self.goal.y
                 agent_loc = agent.x, agent.y
                 dist_penalty = np.linalg.norm((np.array(goal_loc) - np.array(agent_loc)), 1) / self.max_dist
-                rewards.append(-1 - dist_penalty)
+                row_penalty = agent.y / self.grid_size[0]
+                rewards.append(-1 - dist_penalty - row_penalty)
 
         return rewards
 
@@ -342,4 +344,5 @@ class PressurePlate(gym.Env):
         return self.viewer.render(self, mode == 'rgb_array')
 
     def close(self):
-        pass
+        if self.viewer:
+            self.viewer.close()

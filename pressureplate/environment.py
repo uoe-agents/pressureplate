@@ -2,8 +2,8 @@ import gym
 from gym import spaces
 import numpy as np
 from enum import IntEnum
-# from .assets import FOUR_PLAYER_WALLS, FOUR_PLAYER_DOORS, FOUR_PLAYER_PLATES, FOUR_PLAYER_AGENTS, FOUR_PLAYER_GOAL
 from .assets import LINEAR
+from .env_utils import OneHotEncoding
 # TODO: Handle case where agent is in the cell of a door and then other agent steps off of the plate
 
 
@@ -13,6 +13,7 @@ _LAYER_WALLS = 1
 _LAYER_DOORS = 2
 _LAYER_PLATES = 3
 _LAYER_GOAL = 4
+
 
 class Actions(IntEnum):
     Up = 0
@@ -74,11 +75,17 @@ class PressurePlate(gym.Env):
 
         self.grid = np.zeros((5, *self.grid_size))
 
-        self.action_space = spaces.Tuple(
-            tuple(2 * [spaces.Discrete(len(Actions))])
-        )
-        self.observation_space
+        self.action_space = spaces.Tuple(tuple(n_agents * [spaces.Discrete(len(Actions))]))
 
+        self.action_space_dim = (sensor_range + 1) * (sensor_range + 1) * 5
+
+        # self.observation_space = spaces.Tuple(tuple(
+        #     n_agents * [spaces.Box(0, 1, (1, (sensor_range + 1) * (sensor_range + 1) * 5))]
+        # ))
+
+        self.observation_space = spaces.Tuple(tuple(
+            n_agents * [spaces.Box(np.array([0] * self.action_space_dim), np.array([1] * self.action_space_dim))]
+        ))
         self.agents = []
         self.plates = []
         self.walls = []
@@ -93,7 +100,7 @@ class PressurePlate(gym.Env):
         self.max_dist = np.linalg.norm(np.array([0, 0]) - np.array([self.grid_size[0] - 1, self.grid_size[1] - 1]), 1)
 
     def step(self, actions):
-        """[up, down, left, right]"""
+        """obs, reward, done info"""
         for i, a in enumerate(actions):
             proposed_pos = [self.agents[i].x, self.agents[i].y]
 
@@ -141,6 +148,8 @@ class PressurePlate(gym.Env):
         if got_goal:
             self.goal.achieved = True
 
+        return self._get_obs(), self._get_rewards(), [self.goal.achieved] * self.n_agents, {}
+
     def _detect_collision(self, proposed_position):
         """Need to check for collision with (1) grid edge, (2) walls, (3) closed doors (4) other agents"""
         # Grid edge
@@ -176,31 +185,36 @@ class PressurePlate(gym.Env):
         self.grid = np.zeros((5, *self.grid_size))
 
         # Agents
+        self.agents = []
         for i, agent in enumerate(self.layout['FOUR_PLAYER_AGENTS']):
             self.agents.append(Agent(i, agent[0], agent[1]))
             self.grid[_LAYER_AGENTS, agent[1], agent[0]] = 1
 
         # Walls
+        self.walls = []
         for i, wall in enumerate(self.layout['FOUR_PLAYER_WALLS']):
             self.walls.append(Wall(i, wall[0], wall[1]))
             self.grid[_LAYER_WALLS, wall[1], wall[0]] = 1
 
         # Doors
+        self.doors = []
         for i, door in enumerate(self.layout['FOUR_PLAYER_DOORS']):
             self.doors.append(Door(i, door[0], door[1]))
             for j in range(len(door[0])):
                 self.grid[_LAYER_DOORS, door[1][j], door[0][j]] = 1
 
         # Plate
+        self.plates = []
         for i, plate in enumerate(self.layout['FOUR_PLAYER_PLATES']):
             self.plates.append(Plate(i, plate[0], plate[1]))
             self.grid[_LAYER_PLATES, plate[1], plate[0]] = 1
 
         # Goal
+        self.goal = []
         self.goal = Goal('goal', self.layout['FOUR_PLAYER_GOAL'][0][0], self.layout['FOUR_PLAYER_GOAL'][0][1])
         self.grid[_LAYER_GOAL, self.layout['FOUR_PLAYER_GOAL'][0][1], self.layout['FOUR_PLAYER_GOAL'][0][0]] = 1
 
-        # return self._get_obs()
+        return self._get_obs()
 
     def _get_obs(self):
         obs = []
@@ -270,9 +284,9 @@ class PressurePlate(gym.Env):
             _goal = _goal.reshape(-1)
 
             # Concat
-            obs.append(np.concatenate((_agents, _walls, _doors, _plates, _goal), axis=0))
+            obs.append(np.concatenate((_agents, _walls, _doors, _plates, _goal), axis=0, dtype=np.float32))
 
-        return obs
+        return tuple(obs)
 
     def _get_flat_grid(self):
         grid = np.zeros(self.grid_size)
@@ -307,7 +321,7 @@ class PressurePlate(gym.Env):
         # The last agent's desired location is the goal instead of a plate, so we use an if/else block
         # to break between the two cases
         for i, agent in enumerate(self.agents):
-            if not i == len(self.agents) - 1:
+            if not i == (len(self.agents) - 1):
                 plate_loc = self.plates[i].x, self.plates[i].y
                 agent_loc = agent.x, agent.y
                 dist_penalty = np.linalg.norm((np.array(plate_loc) - np.array(agent_loc)), 1) / self.max_dist

@@ -93,29 +93,32 @@ class PressurePlate(gym.Env):
         if layout == 'linear':
             self.layout = LINEAR
 
-        self.max_dist = np.linalg.norm(np.array([0, 0]) - np.array([self.grid_size[0] - 1, self.grid_size[1] - 1]), 2)
+        self.max_dist = np.linalg.norm(np.array([0, 0]) - np.array([2, 8]), 1)
+        self.agent_order = list(range(n_agents))
 
     def step(self, actions):
         """obs, reward, done info"""
-        for i, a in enumerate(actions):
+        np.random.shuffle(self.agent_order)
+
+        for i in self.agent_order:
             proposed_pos = [self.agents[i].x, self.agents[i].y]
 
-            if a == 0:
+            if actions[i] == 0:
                 proposed_pos[1] -= 1
                 if not self._detect_collision(proposed_pos):
                     self.agents[i].y -= 1
 
-            elif a == 1:
+            elif actions[i] == 1:
                 proposed_pos[1] += 1
                 if not self._detect_collision(proposed_pos):
                     self.agents[i].y += 1
 
-            elif a == 2:
+            elif actions[i] == 2:
                 proposed_pos[0] -= 1
                 if not self._detect_collision(proposed_pos):
                     self.agents[i].x -= 1
 
-            elif a == 3:
+            elif actions[i] == 3:
                 proposed_pos[0] += 1
                 if not self._detect_collision(proposed_pos):
                     self.agents[i].x += 1
@@ -320,24 +323,37 @@ class PressurePlate(gym.Env):
             if not i == (len(self.agents) - 1):
                 plate_loc = self.plates[i].x, self.plates[i].y
                 agent_loc = agent.x, agent.y
-                dist_penalty = np.linalg.norm((np.array(plate_loc) - np.array(agent_loc)), 2) / self.max_dist
-                if dist_penalty == 0:
-                    on_plate = 1
+
+                room_bonus = 0
+                dist_penalty = 0
+
+                if i == 0:
+                    if agent.y > 11:
+                        room_bonus = 1
+                        dist_penalty = np.linalg.norm((np.array(plate_loc) - np.array(agent_loc)), 1) / self.max_dist
+                elif i == 1:
+                    if agent.y < 11 and agent.y > 7:
+                        room_bonus = 1
+                        dist_penalty = np.linalg.norm((np.array(plate_loc) - np.array(agent_loc)), 1) / self.max_dist
                 else:
-                    on_plate = 0
-                row_penalty = agent.y / self.grid_size[0]
-                rewards.append(-1 - dist_penalty - row_penalty + on_plate)
+                    if agent.y < 7 and agent.y > 3:
+                        room_bonus = 1
+                        dist_penalty = np.linalg.norm((np.array(plate_loc) - np.array(agent_loc)), 1) / self.max_dist
+
+                rewards.append(-1 - dist_penalty + room_bonus)
 
             else:
                 goal_loc = self.goal.x, self.goal.y
                 agent_loc = agent.x, agent.y
-                dist_penalty = np.linalg.norm((np.array(goal_loc) - np.array(agent_loc)), 2) / self.max_dist
-                row_penalty = agent.y / self.grid_size[0]
-                if dist_penalty == 0:
-                    on_plate = 1
-                else:
-                    on_plate = 0
-                rewards.append(-1 - dist_penalty - row_penalty + on_plate)
+
+                room_bonus = 0
+                dist_penalty = 0
+
+                if agent.y < 3:
+                    room_bonus = 1
+                    dist_penalty = np.linalg.norm((np.array(goal_loc) - np.array(agent_loc)), 1) / self.max_dist
+
+                rewards.append(-1 - dist_penalty + room_bonus)
 
         return rewards
 

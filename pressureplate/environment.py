@@ -3,7 +3,6 @@ from gym import spaces
 import numpy as np
 from enum import IntEnum
 from .assets import LINEAR
-from .env_utils import OneHotEncoding
 # TODO: Handle case where agent is in the cell of a door and then other agent steps off of the plate
 
 

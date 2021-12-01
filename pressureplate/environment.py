@@ -76,7 +76,7 @@ class PressurePlate(gym.Env):
 
         self.action_space = spaces.Tuple(tuple(n_agents * [spaces.Discrete(len(Actions))]))
 
-        self.action_space_dim = (sensor_range + 1) * (sensor_range + 1) * 5
+        self.action_space_dim = (sensor_range + 1) * (sensor_range + 1) * 4 + 2
 
         self.observation_space = spaces.Tuple(tuple(
             n_agents * [spaces.Box(np.array([0] * self.action_space_dim), np.array([1] * self.action_space_dim))]
@@ -94,6 +94,7 @@ class PressurePlate(gym.Env):
 
         self.max_dist = np.linalg.norm(np.array([0, 0]) - np.array([2, 8]), 1)
         self.agent_order = list(range(n_agents))
+        self.viewer = None
 
     def step(self, actions):
         """obs, reward, done info"""
@@ -184,9 +185,13 @@ class PressurePlate(gym.Env):
 
         # Agents
         self.agents = []
-        for i, agent in enumerate(self.layout['FOUR_PLAYER_AGENTS']):
-            self.agents.append(Agent(i, agent[0], agent[1]))
-            self.grid[_LAYER_AGENTS, agent[1], agent[0]] = 1
+        for i in range(self.n_agents):
+            self.agents.append(Agent(i,
+                                    self.layout['FOUR_PLAYER_AGENTS'][self.agent_order[i]][0],
+                                    self.layout['FOUR_PLAYER_AGENTS'][self.agent_order[i]][1]))
+            self.grid[_LAYER_AGENTS,
+                    self.layout['FOUR_PLAYER_AGENTS'][self.agent_order[i]][1],
+                    self.layout['FOUR_PLAYER_AGENTS'][self.agent_order[i]][0]] = 1
 
         # Walls
         self.walls = []
@@ -282,7 +287,7 @@ class PressurePlate(gym.Env):
             _goal = _goal.reshape(-1)
 
             # Concat
-            obs.append(np.concatenate((_agents, _walls, _doors, _plates, _goal), axis=0, dtype=np.float32))
+            obs.append(np.concatenate((_agents, _plates, _doors, _goal, np.array([x, y])), axis=0, dtype=np.float32))
 
         return tuple(obs)
 
@@ -319,41 +324,29 @@ class PressurePlate(gym.Env):
         # The last agent's desired location is the goal instead of a plate, so we use an if/else block
         # to break between the two cases
         for i, agent in enumerate(self.agents):
-            if not i == (len(self.agents) - 1):
-                plate_loc = self.plates[i].x, self.plates[i].y
-                agent_loc = agent.x, agent.y
 
-                room_bonus = 0
-                dist_penalty = 0
-
-                if i == 0:
-                    if agent.y > 11:
-                        room_bonus = 1
-                        dist_penalty = np.linalg.norm((np.array(plate_loc) - np.array(agent_loc)), 1) / self.max_dist
-                elif i == 1:
-                    if agent.y < 11 and agent.y > 7:
-                        room_bonus = 1
-                        dist_penalty = np.linalg.norm((np.array(plate_loc) - np.array(agent_loc)), 1) / self.max_dist
-                else:
-                    if agent.y < 7 and agent.y > 3:
-                        room_bonus = 1
-                        dist_penalty = np.linalg.norm((np.array(plate_loc) - np.array(agent_loc)), 1) / self.max_dist
-
-                rewards.append(-1 - dist_penalty + room_bonus)
-
+            if i == len(self.agents) -1:
+                plate_loc = self.goal.x, self.goal.y
             else:
-                goal_loc = self.goal.x, self.goal.y
-                agent_loc = agent.x, agent.y
+                plate_loc = self.plates[i].x, self.plates[i].y
 
-                room_bonus = 0
-                dist_penalty = 0
+            agent_loc = agent.x, agent.y
 
-                if agent.y < 3:
-                    room_bonus = 1
-                    dist_penalty = np.linalg.norm((np.array(goal_loc) - np.array(agent_loc)), 1) / self.max_dist
+            if agent.y > 11:
+                cur_room = 0
+            elif agent.y > 7:
+                cur_room = 1
+            elif agent.y > 3:
+                cur_room = 2
+            else:
+                cur_room = 3
 
-                rewards.append(-1 - dist_penalty + room_bonus)
-
+            if i == cur_room:
+                reward = - np.linalg.norm((np.array(plate_loc) - np.array(agent_loc)), 1) / self.max_dist
+            else:
+                reward = -3 + cur_room
+            
+            rewards.append(reward)
         return rewards
 
     def _init_render(self):

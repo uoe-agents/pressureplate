@@ -184,9 +184,13 @@ class PressurePlate(gym.Env):
 
         # Agents
         self.agents = []
-        for i, agent in enumerate(self.layout['FOUR_PLAYER_AGENTS']):
-            self.agents.append(Agent(i, agent[0], agent[1]))
-            self.grid[_LAYER_AGENTS, agent[1], agent[0]] = 1
+        for i in range(self.n_agents):
+            self.agents.append(Agent(i,
+                                    self.layout['FOUR_PLAYER_AGENTS'][self.agent_order[i]][0],
+                                    self.layout['FOUR_PLAYER_AGENTS'][self.agent_order[i]][1]))
+            self.grid[_LAYER_AGENTS,
+                    self.layout['FOUR_PLAYER_AGENTS'][self.agent_order[i]][1],
+                    self.layout['FOUR_PLAYER_AGENTS'][self.agent_order[i]][0]] = 1
 
         # Walls
         self.walls = []

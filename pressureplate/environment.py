@@ -94,6 +94,7 @@ class PressurePlate(gym.Env):
 
         self.max_dist = np.linalg.norm(np.array([0, 0]) - np.array([2, 8]), 1)
         self.agent_order = list(range(n_agents))
+        self.viewer = None
 
     def step(self, actions):
         """obs, reward, done info"""

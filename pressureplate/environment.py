@@ -90,11 +90,23 @@ class PressurePlate(gym.Env):
         self._rendering_initialized = False
 
         if layout == 'linear':
-            self.layout = LINEAR
+            if self.n_agents == 4:
+                self.layout = LINEAR['FOUR_PLAYERS']
+
+            elif self.n_agents == 5:
+                self.layout = LINEAR['FIVE_PLAYERS']
+
+            elif self.n_agents == 6:
+                self.layout = LINEAR['SIX_PLAYERS']
+            else:
+                raise ValueError(f'Number of agents given ({self.n_agents}) is not supported.')
 
         self.max_dist = np.linalg.norm(np.array([0, 0]) - np.array([2, 8]), 1)
         self.agent_order = list(range(n_agents))
         self.viewer = None
+
+        self.room_boundaries = np.unique(np.array(self.layout['WALLS'])[:, 1]).tolist()[::-1]
+        self.room_boundaries.append(-1)
 
     def step(self, actions):
         """obs, reward, done info"""
@@ -187,35 +199,35 @@ class PressurePlate(gym.Env):
         self.agents = []
         for i in range(self.n_agents):
             self.agents.append(Agent(i,
-                                    self.layout['FOUR_PLAYER_AGENTS'][self.agent_order[i]][0],
-                                    self.layout['FOUR_PLAYER_AGENTS'][self.agent_order[i]][1]))
+                                    self.layout['AGENTS'][self.agent_order[i]][0],
+                                    self.layout['AGENTS'][self.agent_order[i]][1]))
             self.grid[_LAYER_AGENTS,
-                    self.layout['FOUR_PLAYER_AGENTS'][self.agent_order[i]][1],
-                    self.layout['FOUR_PLAYER_AGENTS'][self.agent_order[i]][0]] = 1
+                    self.layout['AGENTS'][self.agent_order[i]][1],
+                    self.layout['AGENTS'][self.agent_order[i]][0]] = 1
 
         # Walls
         self.walls = []
-        for i, wall in enumerate(self.layout['FOUR_PLAYER_WALLS']):
+        for i, wall in enumerate(self.layout['WALLS']):
             self.walls.append(Wall(i, wall[0], wall[1]))
             self.grid[_LAYER_WALLS, wall[1], wall[0]] = 1
 
         # Doors
         self.doors = []
-        for i, door in enumerate(self.layout['FOUR_PLAYER_DOORS']):
+        for i, door in enumerate(self.layout['DOORS']):
             self.doors.append(Door(i, door[0], door[1]))
             for j in range(len(door[0])):
                 self.grid[_LAYER_DOORS, door[1][j], door[0][j]] = 1
 
         # Plate
         self.plates = []
-        for i, plate in enumerate(self.layout['FOUR_PLAYER_PLATES']):
+        for i, plate in enumerate(self.layout['PLATES']):
             self.plates.append(Plate(i, plate[0], plate[1]))
             self.grid[_LAYER_PLATES, plate[1], plate[0]] = 1
 
         # Goal
         self.goal = []
-        self.goal = Goal('goal', self.layout['FOUR_PLAYER_GOAL'][0][0], self.layout['FOUR_PLAYER_GOAL'][0][1])
-        self.grid[_LAYER_GOAL, self.layout['FOUR_PLAYER_GOAL'][0][1], self.layout['FOUR_PLAYER_GOAL'][0][0]] = 1
+        self.goal = Goal('goal', self.layout['GOAL'][0][0], self.layout['GOAL'][0][1])
+        self.grid[_LAYER_GOAL, self.layout['GOAL'][0][1], self.layout['GOAL'][0][0]] = 1
 
         return self._get_obs()
 
@@ -325,29 +337,30 @@ class PressurePlate(gym.Env):
         # to break between the two cases
         for i, agent in enumerate(self.agents):
 
-            if i == len(self.agents) -1:
+            if i == len(self.agents) - 1:
                 plate_loc = self.goal.x, self.goal.y
             else:
                 plate_loc = self.plates[i].x, self.plates[i].y
 
+            curr_room = self._get_curr_room_reward(agent.y)
+
             agent_loc = agent.x, agent.y
 
-            if agent.y > 11:
-                cur_room = 0
-            elif agent.y > 7:
-                cur_room = 1
-            elif agent.y > 3:
-                cur_room = 2
-            else:
-                cur_room = 3
-
-            if i == cur_room:
+            if i == curr_room:
                 reward = - np.linalg.norm((np.array(plate_loc) - np.array(agent_loc)), 1) / self.max_dist
             else:
-                reward = -3 + cur_room
+                reward = -len(self.room_boundaries)+1 + curr_room
             
             rewards.append(reward)
         return rewards
+
+    def _get_curr_room_reward(self, agent_y):
+        for i, room_level in enumerate(self.room_boundaries):
+            if agent_y > room_level:
+                curr_room = i
+                break
+
+        return curr_room
 
     def _init_render(self):
         from .rendering import Viewer

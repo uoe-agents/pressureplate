@@ -79,12 +79,12 @@ class Viewer:
 
         self.width = self.cols * self.grid_size + 1
         self.height = self.rows * self.grid_size + 1
-        # self.window = pyglet.window.Window(
-        #     width=self.width, height=self.height, display=display
-        # )
+
+        disp_height = 1000
+        disp_width = 1000 * (self.cols / self.rows)
 
         self.window = pyglet.window.Window(
-            width=600, height=1000, display=display
+            width=int(disp_width), height=disp_height, display=display
         )
 
         self.window.on_close = self.window_closed_by_user
@@ -242,27 +242,6 @@ class Viewer:
                             batch=batch
                         )
                     )
-                # else:
-                #     if j == 0:
-                #         if not door.open:
-                #             doors.append(
-                #                 pyglet.sprite.Sprite(
-                #                     self.img_door_left,
-                #                     self.grid_size * col,
-                #                     self.height - self.grid_size * (row + 1),
-                #                     batch=batch
-                #                 )
-                #             )
-                #     else:
-                #         if not door.open:
-                #             doors.append(
-                #                 pyglet.sprite.Sprite(
-                #                     self.img_door_right,
-                #                     self.grid_size * col,
-                #                     self.height - self.grid_size * (row + 1),
-                #                     batch=batch
-                #                 )
-                #             )
 
         for d in doors:
             d.update(scale=self.grid_size / d.width)

@@ -14,6 +14,30 @@ register(
     }
 )
 
+register(
+    id=f'pressureplate-linear-5p-v0',
+    entry_point='pressureplate.environment:PressurePlate',
+    kwargs={
+        'height': 19,
+        'width': 9,
+        'n_agents': 5,
+        'sensor_range': 4,
+        'layout': 'linear'
+    }
+)
+
+register(
+    id=f'pressureplate-linear-6p-v0',
+    entry_point='pressureplate.environment:PressurePlate',
+    kwargs={
+        'height': 23,
+        'width': 9,
+        'n_agents': 6,
+        'sensor_range': 4,
+        'layout': 'linear'
+    }
+)
+
 
 # _sizes = {
 #     "tiny": (5, 5),

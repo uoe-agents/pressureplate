@@ -58,13 +58,7 @@ class Goal(Entity):
 
 
 class PressurePlate(gym.Env):
-    """
-    0 0 0 0 0
-    0 0 0 0 G
-    w w D w w
-    a 0 0 0 p
-    a 0 0 0 0
-    """
+    """"""
     metadata = {"render.modes": ["human"]}
 
     def __init__(self, height, width, n_agents, sensor_range, layout):
@@ -150,7 +144,7 @@ class PressurePlate(gym.Env):
                     plate.pressed = False
                     self.doors[plate.id].open = False
 
-        # Detecting reward collision
+        # Detecting goal completion
         r = []
         for agent in self.agents:
             r.append([agent.x, agent.y] == [self.goal.x, self.goal.y])

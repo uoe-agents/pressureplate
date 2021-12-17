@@ -46,9 +46,11 @@ The dictionary must contain lists of ```(x,y)``` coordinates of the following el
 * ```'AGENTS'```
 * ```'GOAL'```
 
-Additionally, you will need to register the new task as a gym environment within ```pressureplate/__init__.py```
-For detailed instructions,
-please refer to the docstring within ```pressureplate/assets.py```.
+Additionally, you will need to register the new task as a gym environment within ```pressureplate/__init__.py```. 
+Finally, edit the ```PressurePlate``` class with ```pressureplate/environment.py``` to load your custom layout into the
+```self.layout``` attribute.
+
+For detailed instructions, please refer to the docstring within ```pressureplate/assets.py```.
 
 # Citation
 

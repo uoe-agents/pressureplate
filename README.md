@@ -26,14 +26,16 @@ Finally, the agent's ``(x,y)`` coordinates are concatenated to the end of the ob
 
 See the below figure for a depiction of this process.
 <p align="center">
- <img width="185px" src="imgs/obs_example.png" align="center"/>
+ <img width="300px" src="imgs/obs_example.png" align="center"/>
 </p>
 
 ## Action Space
 Pressure Plate's action space is discrete and has five options: up, down, left, right, and no-op (do nothing).
 
 ## Reward Function
-
+Each agent receives rewards independent of other agents. If an agent is in the room that contains their assigned plate,
+their reward is the normalized manhattan distance between their current position and the plate. Otherwise, their reward is 
+the number of rooms between their current room and the room that contains their assigned plate.
 
 # Installation
 After cloning the repo, ```cd``` into ```pressureplate``` and:

@@ -3,8 +3,6 @@ from gym import spaces
 import numpy as np
 from enum import IntEnum
 from .assets import LINEAR
-# TODO: Handle case where agent is in the cell of a door and then other agent steps off of the plate
-
 
 # Global elements
 _LAYER_AGENTS = 0
@@ -274,7 +272,6 @@ class PressurePlate(gym.Env):
             _doors = _doors.reshape(-1)
 
             # Plate
-            # TODO: should an agent be able to see all plates or only _their_ plate?
             _plates = self.grid[_LAYER_PLATES, y_up:y_down + 1, x_left:x_right + 1]
 
             _plates = np.concatenate((np.zeros((_plates.shape[0], x_left_padding)), _plates), axis=1)

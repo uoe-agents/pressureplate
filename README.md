@@ -1,3 +1,6 @@
+<p align="center">
+ <img width="400px" src="imgs/env_title.png" align="center"/>
+</p>
 # PressurePlate
 
 

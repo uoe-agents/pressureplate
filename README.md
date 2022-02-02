@@ -1,8 +1,6 @@
 <p align="center">
  <img width="400px" src="imgs/env_title.png" align="center"/>
 </p>
-# PressurePlate
-
 
 [![Maintenance](https://img.shields.io/badge/Maintained%3F-yes-green.svg)](https://GitHub.com/Naereen/StrapDown.js/graphs/commit-activity)
 [![GitHub license](https://img.shields.io/github/license/Naereen/StrapDown.js.svg)](https://github.com/Naereen/StrapDown.js/blob/master/LICENSE)
@@ -13,19 +11,16 @@
 
 
 # Description
-Pressure Plate is a multi-agent environment that requires agents to cooperate during the traveral of a gridworld.
-The grid is partitioned into several rooms. Within each room is a plate and a closed doorway. In order to open the door
-into the next room, an agent needs to remain standing within the gridcell that contains the plate. The task is considered
-to be solved when the goal cell (depicted with a treasure chest) is reached.
+PressurePlate is a multi-agent environment that requires agents to cooperate during the traversal of a gridworld. The grid is partitioned into several rooms, and each room contains a plate and a closed doorway. Before episodes begin, each agent is assigned a plate that only they can activate. For the group of agents to proceed into the next room, an agent must remain behind, standing on their assigned plate. The task is considered solved when the goal (depicted with a treasure chest) is reached.
 
-Currently, Pressure Plate supports four-, five-, and six-player linear levels, but is easily configurable for
+Currently, Pressure Plate supports four-, five-, and six-player levels but is easily configurable for
 custom scenarios. See [Customizing Scenarios](#customizing-scenarios) for more information.
 
 ## Observation Space
 Each agent has a distance-limited view of the environment, as defined by the ``sensor_range`` attribute of the ``PressurePlate``
 class. The PressurePlate world is made of several 2D grids, where each grid corresponds to an entity type. For example,
 one grid corresponds to walls, one grid corresponds to plates, and so on. When queried, the environment produces a subsection 
-of each grid that corresponds to each agent's viewing range. These subsections are flattened and concatenated together.
+of each grid that corresponds to each agent's viewing range. Next, these subsections are flattened and concatenated together.
 Finally, the agent's ``(x,y)`` coordinates are concatenated to the end of the observation vector.
 
 See the below figure for a depiction of this process for ``Agent 0`` and the ``Doors`` grid.
@@ -40,7 +35,7 @@ For each call of ``.step()``, the ordering of action-execution is randomized.
 
 ## Reward Function
 Each agent receives rewards independent of other agents. If an agent is in the room that contains their assigned plate,
-their reward is the normalized manhattan distance between their current position and the plate. Otherwise, their reward is 
+their reward is the normalized Manhattan distance between their current position and the plate. Otherwise, their reward is 
 the number of rooms between their current room and the room that contains their assigned plate.
 
 # Installation

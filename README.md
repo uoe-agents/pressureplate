@@ -12,7 +12,8 @@
 # Description
 Pressure Plate is a multi-agent environment that requires agents to cooperate during the traveral of a gridworld.
 The grid is partitioned into several rooms. Within each room is a plate and a closed doorway. In order to open the door
-into the next room, an agent needs to remain standing within the gridcell that contains the plate. 
+into the next room, an agent needs to remain standing within the gridcell that contains the plate. The task is considered
+to be solved when the goal cell (depicted with a treasure chest) is reached.
 
 Currently, Pressure Plate supports four-, five-, and six-player linear levels, but is easily configurable for
 custom scenarios. See [Customizing Scenarios](#customizing-scenarios) for more information.
@@ -24,13 +25,15 @@ one grid corresponds to walls, one grid corresponds to plates, and so on. When q
 of each grid that corresponds to each agent's viewing range. These subsections are flattened and concatenated together.
 Finally, the agent's ``(x,y)`` coordinates are concatenated to the end of the observation vector.
 
-See the below figure for a depiction of this process.
+See the below figure for a depiction of this process for ``Agent 0`` and the ``Doors`` grid.
 <p align="center">
- <img width="300px" src="imgs/obs_example.png" align="center"/>
+ <img width="325px" src="imgs/obs_example.png" align="center"/>
 </p>
 
 ## Action Space
 Pressure Plate's action space is discrete and has five options: up, down, left, right, and no-op (do nothing).
+
+For each call of ``.step()``, the ordering of action-execution is randomized.
 
 ## Reward Function
 Each agent receives rewards independent of other agents. If an agent is in the room that contains their assigned plate,
@@ -68,7 +71,5 @@ Finally, edit the ```PressurePlate``` class with ```pressureplate/environment.py
 ```self.layout``` attribute.
 
 For detailed instructions, please refer to the docstring within ```pressureplate/assets.py```.
-
-# Citation
 
 

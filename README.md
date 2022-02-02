@@ -11,14 +11,26 @@
 
 # Description
 Pressure Plate is a multi-agent environment that requires agents to cooperate during the traveral of a gridworld.
+The grid is partitioned into several rooms. Within each room is a plate and a closed doorway. In order to open the door
+into the next room, an agent needs to remain standing within the gridcell that contains the plate. 
 
 Currently, Pressure Plate supports four-, five-, and six-player linear levels, but is easily configurable for
 custom scenarios. See [Customizing Scenarios](#customizing-scenarios) for more information.
 
 ## Observation Space
+Each agent has a distance-limited view of the environment, as defined by the ``sensor_range`` attribute of the ``PressurePlate``
+class. The PressurePlate world is made of several 2D grids, where each grid corresponds to an entity type. For example,
+one grid corresponds to walls, one grid corresponds to plates, and so on. When queried, the environment produces a subsection 
+of each grid that corresponds to each agent's viewing range. These subsections are flattened and concatenated together.
+Finally, the agent's ``(x,y)`` coordinates are concatenated to the end of the observation vector.
+
+See the below figure for a depiction of this process.
+<p align="center">
+ <img width="185px" src="imgs/obs_example.png" align="center"/>
+</p>
 
 ## Action Space
-Pressure Plate's action space is discrete and has four options: up, down, left, right, no-op.
+Pressure Plate's action space is discrete and has five options: up, down, left, right, and no-op (do nothing).
 
 ## Reward Function
 
@@ -30,12 +42,15 @@ pip install -e .
 ```
 
 # Using Pressure Plate
-Within your Python script, access the three currently available tasks as follows:
+Within your Python script, access the three currently-available tasks as follows:
 ```python
 env = gym.make('pressureplate-linear-4p-v0')
 env = gym.make('pressureplate-linear-5p-v0')
 env = gym.make('pressureplate-linear-6p-v0')
 ```
+
+The PressurePlate environment is implemented within the Gym paradigm, and therefore uses the usual ``.step()``, 
+``.reset()``, and ``.render()`` methods.
 ## Customizing Scenarios
 To create a custom Pressure Plate layout, you can add a layout dictionary to the ```pressureplate/assets.py``` file. 
 The dictionary must contain lists of ```(x,y)``` coordinates of the following elements:

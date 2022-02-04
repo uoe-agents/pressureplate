@@ -13,7 +13,7 @@
 # Description
 PressurePlate is a multi-agent environment that requires agents to cooperate during the traversal of a gridworld. The grid is partitioned into several rooms, and each room contains a plate and a closed doorway. Before episodes begin, each agent is assigned a plate that only they can activate. For the group of agents to proceed into the next room, an agent must remain behind, standing on their assigned plate. The task is considered solved when the goal (depicted with a treasure chest) is reached.
 
-Currently, Pressure Plate supports four-, five-, and six-player levels but is easily configurable for
+Currently, PressurePlate supports four-, five-, and six-player levels but is easily configurable for
 custom scenarios. See [Customizing Scenarios](#customizing-scenarios) for more information.
 
 ## Observation Space
@@ -29,13 +29,13 @@ See the below figure for a depiction of this process for ``Agent 0`` and the ``D
 </p>
 
 ## Action Space
-Pressure Plate's action space is discrete and has five options: up, down, left, right, and no-op (do nothing).
+PressurePlate's action space is discrete and has five options: up, down, left, right, and no-op (do nothing).
 
 For each call of ``.step()``, the ordering of action-execution is randomized.
 
 ## Reward Function
 Each agent receives rewards independent of other agents. If an agent is in the room that contains their assigned plate,
-their reward is the normalized Manhattan distance between their current position and the plate. Otherwise, their reward is 
+their reward is the negative normalized Manhattan distance between their current position and the plate. Otherwise, their reward is 
 the number of rooms between their current room and the room that contains their assigned plate.
 
 # Installation
@@ -44,7 +44,7 @@ After cloning the repo, ```cd``` into ```pressureplate``` and:
 pip install -e .
 ```
 
-# Using Pressure Plate
+# Using PressurePlate
 Within your Python script, access the three currently-available tasks as follows:
 ```python
 env = gym.make('pressureplate-linear-4p-v0')
@@ -55,7 +55,7 @@ env = gym.make('pressureplate-linear-6p-v0')
 The PressurePlate environment is implemented within the Gym paradigm, and therefore uses the usual ``.step()``, 
 ``.reset()``, and ``.render()`` methods.
 ## Customizing Scenarios
-To create a custom Pressure Plate layout, you can add a layout dictionary to the ```pressureplate/assets.py``` file. 
+To create a custom PressurePlate layout, you can add a layout dictionary to the ```pressureplate/assets.py``` file. 
 The dictionary must contain lists of ```(x,y)``` coordinates of the following elements:
 * A unique identifier (e.g., ```'FOUR_PLAYERS'```)
 * ```'WALLS'```
